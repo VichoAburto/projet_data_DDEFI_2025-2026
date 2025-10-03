@@ -1,0 +1,13 @@
+__pycache__
+
+# Node modules
+/node_modules
+
+# Editor directories
+.vscode/*
+
+# Local env files
+.env
+
+# MacOS
+.DS_Store
