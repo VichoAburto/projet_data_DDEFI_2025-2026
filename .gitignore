@@ -2,6 +2,7 @@ __pycache__
 
 # Node modules
 /node_modules
+*/node_modules
 
 # Editor directories
 .vscode/*
