@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+require('dotenv').config();
 
 const PORT = process.env.PORT || 8000;
 
@@ -83,4 +84,41 @@ app.post('/tshirt/:id', (req, res) => {
   res.send({
     tshirt: `👕 with your ${logo} and ID of ${id}`
   });
+});
+
+/**
+ * @swagger
+ * /predict:
+ *   post:
+ *     description: Get a prediction from the ML service
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Returns the prediction result from the ML service
+ *       500:
+ *         description: Failed to reach ML service
+ * */
+app.post("/predict", async (req, res) => {
+  try {
+    const mlUrl = process.env.ML_SERVICE_URL;
+    if (!mlUrl) {
+      return res.status(500).json({ error: "ML_SERVICE_URL not set" });
+    }
+
+    const r = await fetch(`${mlUrl}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await r.json();
+    return res.status(r.status).json(data);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to reach ML service" });
+  }
 });
