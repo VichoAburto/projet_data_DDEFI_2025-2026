@@ -12,7 +12,7 @@ export default function Navbar() {
           className="flex items-center gap-3 text-white"
         >
           <Image
-            src="/icon.png"
+            src="/logo.png"
             alt="FX Predictor logo"
             width={0}
             height={0}
