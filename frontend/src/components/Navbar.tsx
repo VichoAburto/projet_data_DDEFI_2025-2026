@@ -1,16 +1,30 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 w-full z-50 border-b border-slate-800 bg-[#10233b] text-white">
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="text-xl font-semibold tracking-tight text-white">
-          FX Predictor
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-white"
+        >
+          <Image
+            src="/icon.png"
+            alt="FX Predictor logo"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-10 w-auto"
+          />
+          <span className="font-semibold text-xl tracking-tight">
+            FX Predictor
+          </span>
         </Link>
 
-        <div className="flex items-center gap-6 text-sm text-white/80">
+        <div className="flex items-center gap-6 text-base text-white/80">
           <Link href="/" className="hover:text-white transition">
             Home
           </Link>
