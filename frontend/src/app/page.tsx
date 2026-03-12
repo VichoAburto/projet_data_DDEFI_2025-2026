@@ -1,20 +1,126 @@
-"use client";
+import Link from "next/link";
+import { US, BR, CL, EU } from "country-flag-icons/react/3x2";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+const pairs = [
+  {
+    pair: "EURUSD",
+    title: "USD → EUR",
+    description: "Explore how the US Dollar moves against the Euro.",
+    flag: US,
+  },
+  {
+    pair: "EURBRL",
+    title: "BRL → EUR",
+    description: "Analyze Brazilian Real exchange-rate behaviour versus the Euro.",
+    flag: BR,
+  },
+  {
+    pair: "EURCLP",
+    title: "CLP → EUR",
+    description: "Track Chilean Peso movements to identify favorable conversion windows.",
+    flag: CL,
+  },
+];
 
-export default function Home() {
-  const router = useRouter();
+export default function HomePage() {
+  return (
+    <div className="py-12 md:py-20">
+      <section className="mb-16">
+        <div className="max-w-3xl">
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-teal-700 mb-4">
+            FX Decision Support
+          </p>
 
-  useEffect(() => {
-    fetch("/api/tshirt")
-      .then(res => res.json())
-      .then(data => {
-        console.log("API response:", data);
-        router.push("/pair/EURUSD"); // redirect AFTER logging
-      })
-      .catch(err => console.error("API error:", err));
-  }, [router]);
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6">
+            Find the best predicted day to exchange your money into euros.
+          </h1>
 
-  return null;
+          <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mb-8">
+            This app helps users decide when it may be most favorable, within
+            the next month, to convert CLP, BRL, or USD into EUR using
+            historical exchange-rate data and machine learning forecasts.
+          </p>
+
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/pair/EURUSD"
+              className="px-5 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition"
+            >
+              Explore FX Pairs
+            </Link>
+
+            <Link
+              href="/about"
+              className="px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-medium hover:border-slate-400 hover:text-slate-900 transition"
+            >
+              About the Project
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-16">
+        <div className="grid gap-5 md:grid-cols-3">
+          {pairs.map((item) => (
+            <Link
+              key={item.pair}
+              href={`/pair/${item.pair}`}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
+            >
+              <div className="flex items-center gap-3 text-2xl font-bold text-slate-900 mb-2">
+                <div className="flex items-center gap-1">
+                  <item.flag className="w-8 h-6 rounded-sm" />
+                </div>
+                {item.title}
+                <div className="flex items-center gap-1">
+                  <EU className="w-8 h-6 rounded-sm" />
+                </div>
+              </div>
+              <div className="text-slate-600 mb-4">{item.description}</div>
+              <div className="text-sm font-medium text-teal-700">
+                Open chart →
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 md:p-10 shadow-sm">
+          <div className="grid gap-8 md:grid-cols-3">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                Historical analysis
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                Inspect how exchange rates evolved over time and compare
+                short-term and long-term trends across major currency pairs.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                Monthly decision support
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                The goal is to help users estimate the most favorable day,
+                within the next month, to exchange their local currency into
+                euros.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                Machine learning forecasts
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                Predictive models are used to explore short-term FX behaviour
+                and support smarter exchange timing decisions.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

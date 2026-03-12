@@ -97,11 +97,11 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const value = payload[0]?.value;
 
   return (
-    <div className="rounded-xl border border-border bg-card px-3 py-2 shadow">
-      <div className="text-xs text-muted-foreground">
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+      <div className="text-xs text-slate-500">
         {new Date(label).toLocaleString()}
       </div>
-      <div className="text-sm font-semibold text-foreground">
+      <div className="text-sm font-semibold text-slate-900">
         {typeof value === "number" ? value.toFixed(4) : "--"}
       </div>
     </div>
@@ -120,10 +120,26 @@ export default function PairPage() {
   const [fullSeries, setFullSeries] = useState<Point[]>([]);
 
   useEffect(() => {
-    setFullSeries(getPairSeries(pairParam)); // runs only on client
+    fetch(`/api/fx/${pairParam}/history`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("FX history:", data);
+
+        // Ajusta esto según la forma exacta que devuelve tu backend
+        const rows = Array.isArray(data) ? data : data.data ?? [];
+
+        const parsed: Point[] = rows.map((item: { date: string; close?: number; rate?: number }) => ({
+          t: new Date(item.date).getTime(),
+          rate: item.rate ?? item.close ?? 0,
+        }));
+
+        setFullSeries(parsed);
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+      });
   }, [pairParam]);
 
-  // ✅ IMPORTANT: all hooks (including useMemo) must run before any early return
   const filtered = useMemo(() => {
     const windowMs = rangeToMs(range);
 
@@ -137,12 +153,11 @@ export default function PairPage() {
       .map((p) => ({ ...p, dateLabel: formatXAxis(p.t) }));
   }, [fullSeries, range]);
 
-  // ✅ NOW it's safe to early-return
   if (!fullSeries.length) {
     return (
-      <div className="min-h-screen bg-background p-6 md:p-12">
+      <div className="min-h-screen p-6 md:p-12">
         <div className="max-w-5xl mx-auto w-full">
-          <p className="text-muted-foreground">Loading chart…</p>
+          <p className="text-slate-500">Loading chart…</p>
         </div>
       </div>
     );
@@ -156,15 +171,15 @@ export default function PairPage() {
   const isPositive = changePct >= 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0b0f14] via-[#0e141b] to-[#0b0f14]">
+    <div className="min-h-screen py-8">
       <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6">
         {/* Top bar: pair menu */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
               {pairMeta.title}
             </h1>
-            <span className="text-muted-foreground text-lg">
+            <span className="text-slate-600 text-lg">
               {pairMeta.subtitle}
             </span>
           </div>
@@ -175,10 +190,10 @@ export default function PairPage() {
               <Link
                 key={p.pair}
                 href={`/pair/${p.pair}`}
-                className={`px-3 py-1.5 rounded-xl border text-sm ${
+                className={`px-3 py-1.5 rounded-xl border text-sm transition ${
                   p.pair === pairParam
-                    ? "border-teal-300 bg-teal-400/25 text-white"
-                    : "border-white/30 text-white/80 hover:border-white/60 hover:text-white"
+                    ? "border-teal-500 bg-teal-50 text-teal-700"
+                    : "border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"
                 }`}
               >
                 {p.title}
@@ -189,13 +204,13 @@ export default function PairPage() {
 
         {/* Price row */}
         <div className="flex items-baseline gap-4">
-          <span className="text-4xl md:text-5xl font-bold text-foreground">
+          <span className="text-4xl md:text-5xl font-bold text-slate-900">
             {Number.isFinite(currentRate) ? currentRate.toFixed(4) : "--"}
           </span>
 
           <span
             className={`text-lg font-medium ${
-              isPositive ? "text-primary" : "text-destructive"
+              isPositive ? "text-emerald-600" : "text-rose-600"
             }`}
           >
             {isPositive ? "+" : ""}
@@ -214,10 +229,10 @@ export default function PairPage() {
                     onClick={() => setRange(r.key)}
                     type="button"
                     className={[
-                    "px-4 py-2 rounded-full border text-sm transition",
-                    selected
-                        ? "border-teal-300 bg-teal-400/25 text-white"
-                        : "border-white/30 text-white/80 hover:border-white/60 hover:text-white"
+                      "px-4 py-2 rounded-full border text-sm transition",
+                      selected
+                        ? "border-teal-500 bg-teal-50 text-teal-700"
+                        : "border-slate-300 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-900"
                     ].join(" ")}
                 >
                     {r.label}
@@ -228,7 +243,7 @@ export default function PairPage() {
 
         {/* Chart */}
         <div
-          className="bg-card rounded-2xl border border-border p-6"
+          className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6"
           style={{ height: "500px" }}
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -253,7 +268,7 @@ export default function PairPage() {
 
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="hsl(220, 15%, 20%)"
+                stroke="#d6d3d1"
                 vertical={false}
               />
 
@@ -264,7 +279,7 @@ export default function PairPage() {
                 tickFormatter={(v: number) => formatXAxis(v)}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(215, 15%, 55%)", fontSize: 12 }}
+                tick={{ fill: "#64748b", fontSize: 12 }}
                 dy={10}
               />
 
@@ -272,7 +287,7 @@ export default function PairPage() {
                 domain={["auto", "auto"]}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(215, 15%, 55%)", fontSize: 12 }}
+                tick={{ fill: "#64748b", fontSize: 12 }}
                 dx={-10}
                 tickFormatter={(v: number) =>
                   Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)

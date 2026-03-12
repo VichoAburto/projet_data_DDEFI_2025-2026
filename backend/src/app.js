@@ -4,6 +4,9 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
+const YahooFinance = require("yahoo-finance2").default;
+const yahooFinance = new YahooFinance();
+
 const PORT = process.env.PORT || 8000;
 
 const swaggerOptions = {
@@ -192,5 +195,71 @@ app.post("/predict", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to reach ML service" });
+  }
+});
+
+/**
+ * @swagger
+ * /fx/{pair}/history:
+ *   get:
+ *     description: Get historical FX data from Yahoo Finance
+ *     parameters:
+ *       - name: pair
+ *         in: path
+ *         required: true
+ *         type: string
+ *         description: FX pair without =X, for example EURUSD, EURBRL, EURCLP
+ *         example: EURUSD
+ *     responses:
+ *       200:
+ *         description: Returns historical FX prices
+ *       400:
+ *         description: Invalid pair format
+ *       500:
+ *         description: Failed to fetch FX history
+ */
+app.get("/fx/:pair/history", async (req, res) => {
+  try {
+    const rawPair = req.params.pair.toUpperCase().trim();
+
+    // Validación simple: 6 letras, ej EURUSD
+    if (!/^[A-Z]{6}$/.test(rawPair)) {
+      return res.status(400).json({
+        error: "Invalid pair format. Use something like EURUSD, EURBRL or EURCLP",
+      });
+    }
+
+    const yahooSymbol = `${rawPair}=X`;
+
+    const queryOptions = {
+      period1: new Date("1900-01-01"),
+      period2: new Date(),
+      interval: "1d",
+    };
+
+    const result = await yahooFinance.historical(yahooSymbol, queryOptions);
+
+    const cleaned = result.map((item) => ({
+      date: item.date,
+      open: item.open,
+      high: item.high,
+      low: item.low,
+      close: item.close,
+      volume: item.volume,
+    }));
+
+    res.json({
+      pair: rawPair,
+      symbol: yahooSymbol,
+      count: cleaned.length,
+      data: cleaned,
+    });
+  } catch (error) {
+    console.error("Yahoo Finance history error:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch FX history from Yahoo Finance",
+      details: error.message,
+    });
   }
 });
