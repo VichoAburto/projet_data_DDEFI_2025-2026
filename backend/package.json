@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "nodemon ./src/app.js",
+    "dev": "nodemon ./src/app.js",
     "start": "node ./src/app.js"
   },
   "keywords": [],
@@ -16,7 +16,8 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yahoo-finance2": "^3.13.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

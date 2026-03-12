@@ -33,3 +33,30 @@ _**VERY IMPORTANTE TO SET A DESCRIPTIVE AND CONCISE MESSAGE**_ (Imperative metho
 
 4. **Push changes**
 ```git push -u origin branch-name```
+
+
+## Run the project locally
+
+### ML Service
+1. **Move in ml_service folder**
+```cd ml_service```
+2. **Build the Docker container**
+```docker build -t ml_service .```
+3. **Run the Docker container**
+```docker run -p 8001:8001 ml_service```
+
+### Backend
+1. **Move in backend folder**
+```cd backend```
+2. **Install dependencies**
+```npm install```
+3. **Run the server**
+```npm run dev```
+
+### Frontend
+1. **Move in frontend folder**
+```cd frontend```
+2. **Install dependencies**
+```npm install```
+3. **Run the development server**
+```npm run dev```
