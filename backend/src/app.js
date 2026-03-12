@@ -86,6 +86,22 @@ app.post('/tshirt/:id', (req, res) => {
   });
 });
 
+// The body should be a JSON object with the following structure:
+// "features": {
+//       "x1": 1,
+//       "x2": 2,
+//       "x3": 3,
+//       "x4": 4,
+//       "x5": 5,
+//       "x6": 6,
+//       "x7": 7,
+//       "x8": 8,
+//       "x9": 9,
+//       "x10": 10,
+//       "x11": 11,
+//       "x12": 12
+//     }
+
 /**
  * @swagger
  * /predict:
@@ -95,13 +111,69 @@ app.post('/tshirt/:id', (req, res) => {
  *       - name: body
  *         in: body
  *         required: true
- *         type: string
+ *         schema:
+ *           type: object
+ *           required:
+ *             - features
+ *           properties:
+ *             features:
+ *               type: object
+ *               required:
+ *                 - x1
+ *                 - x2
+ *                 - x3
+ *                 - x4
+ *                 - x5
+ *                 - x6
+ *                 - x7
+ *                 - x8
+ *                 - x9
+ *                 - x10
+ *                 - x11
+ *                 - x12
+ *               properties:
+ *                 x1:
+ *                   type: number
+ *                   example: 1
+ *                 x2:
+ *                   type: number
+ *                   example: 2
+ *                 x3:
+ *                   type: number
+ *                   example: 3
+ *                 x4:
+ *                   type: number
+ *                   example: 4
+ *                 x5:
+ *                   type: number
+ *                   example: 5
+ *                 x6:
+ *                   type: number
+ *                   example: 6
+ *                 x7:
+ *                   type: number
+ *                   example: 7
+ *                 x8:
+ *                   type: number
+ *                   example: 8
+ *                 x9:
+ *                   type: number
+ *                   example: 9
+ *                 x10:
+ *                   type: number
+ *                   example: 10
+ *                 x11:
+ *                   type: number
+ *                   example: 11
+ *                 x12:
+ *                   type: number
+ *                   example: 12
  *     responses:
  *       200:
  *         description: Returns the prediction result from the ML service
  *       500:
  *         description: Failed to reach ML service
- * */
+ */
 app.post("/predict", async (req, res) => {
   try {
     const mlUrl = process.env.ML_SERVICE_URL;
