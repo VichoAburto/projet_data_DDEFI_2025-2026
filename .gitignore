@@ -1,4 +1,5 @@
 __pycache__
+*/__pycache__/*
 
 # Node modules
 /node_modules
@@ -9,9 +10,11 @@ __pycache__
 
 # Local env files
 .env
+*/.env
 
 # MacOS
 .DS_Store
+*/.DS_Store
 
 # Virtual environments
 */.venv/*
