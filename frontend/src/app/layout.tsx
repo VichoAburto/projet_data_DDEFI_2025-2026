@@ -13,6 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "FX Predictor",
+  description: "Projet Data DDEFI",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
