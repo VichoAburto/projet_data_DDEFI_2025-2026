@@ -89,22 +89,6 @@ app.post('/tshirt/:id', (req, res) => {
   });
 });
 
-// The body should be a JSON object with the following structure:
-// "features": {
-//       "x1": 1,
-//       "x2": 2,
-//       "x3": 3,
-//       "x4": 4,
-//       "x5": 5,
-//       "x6": 6,
-//       "x7": 7,
-//       "x8": 8,
-//       "x9": 9,
-//       "x10": 10,
-//       "x11": 11,
-//       "x12": 12
-//     }
-
 /**
  * @swagger
  * /predict:
@@ -260,6 +244,60 @@ app.get("/fx/:pair/history", async (req, res) => {
     res.status(500).json({
       error: "Failed to fetch FX history from Yahoo Finance",
       details: error.message,
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /planner/best-day:
+ *   post:
+ *     description: Get the best predicted day to exchange money into EUR
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - currency
+ *             - days_ahead
+ *           properties:
+ *             currency:
+ *               type: string
+ *               example: USD
+ *             days_ahead:
+ *               type: integer
+ *               example: 30
+ *     responses:
+ *       200:
+ *         description: Returns best predicted day and forecast
+ *       500:
+ *         description: Failed to reach ML service
+ */
+app.post("/planner/best-day", async (req, res) => {
+  try {
+    const mlUrl = process.env.ML_SERVICE_URL;
+
+    if (!mlUrl) {
+      return res.status(500).json({ error: "ML_SERVICE_URL not set" });
+    }
+
+    const r = await fetch(`${mlUrl}/predict-best-day`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await r.json();
+
+    return res.status(r.status).json(data);
+  } catch (error) {
+    console.error("Planner backend error:", error);
+    return res.status(500).json({
+      error: "Failed to reach ML service",
     });
   }
 });
