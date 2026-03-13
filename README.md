@@ -7,6 +7,14 @@ Projet Data dans le cadre du cours DDEFI
 - Yassine TSOILI : [GitHub](hazime-y) - [Kaggle](yassinetsoulihazime)
 - Vicente ABURTO : [GitHub](VichoAburto) - [Kaggle](vichoaburto)
 
+## Deployments
+- Backend: [Render](https://projet-data-ddefi-2025-2026.onrender.com/api-docs)
+- ML Service: [Render](https://ml-service-projet-data-ddefi.onrender.com/docs)
+- Frontend: [Vercel](https://projet-data-ddefi-2025-2026.vercel.app/)
+
+Because we used the Free version of Render, the backend and ML service are in 
+sleep mode after 15 minutes of inactivity. It takes around 2 minutes to wake up.
+
 
 ## Before developing
 
