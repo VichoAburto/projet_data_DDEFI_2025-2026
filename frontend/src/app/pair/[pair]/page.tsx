@@ -246,7 +246,7 @@ export default function PairPage() {
           className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6"
           style={{ height: "500px" }}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="98%">
             <AreaChart
               data={filtered}
               margin={{ top: 20, right: 20, left: 0, bottom: 10 }}
@@ -308,6 +308,17 @@ export default function PairPage() {
               />
             </AreaChart>
           </ResponsiveContainer>
+          <div className="mt-3 text-xs text-slate-400">
+            Market data provided by{" "}
+            <a
+              href="https://finance.yahoo.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-slate-600"
+            >
+              Yahoo Finance
+            </a>
+          </div>
         </div>
       </div>
     </div>

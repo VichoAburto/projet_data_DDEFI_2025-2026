@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -16,92 +16,49 @@ type Currency = "USD" | "BRL" | "CLP";
 
 type ForecastPoint = {
   date: string;
-  timestamp: number;
-  rate: number;
+  fx: number;
 };
 
-const CURRENCIES: {
-  code: Currency;
-  label: string;
-  description: string;
-  baseRate: number;
-  volatility: number;
-}[] = [
+type PlannerResponse = {
+  currency: string;
+  supported: boolean;
+  best_date: string;
+  best_fx: number;
+  current_date: string;
+  forecast: ForecastPoint[];
+};
+
+const CURRENCIES = [
   {
-    code: "USD",
+    code: "USD" as Currency,
     label: "US Dollar → Euro",
     description: "Estimate the best day to convert USD into EUR.",
-    baseRate: 1.15,
-    volatility: 0.01,
   },
   {
-    code: "BRL",
+    code: "BRL" as Currency,
     label: "Brazilian Real → Euro",
     description: "Estimate the best day to convert BRL into EUR.",
-    baseRate: 6.2,
-    volatility: 0.05,
   },
   {
-    code: "CLP",
+    code: "CLP" as Currency,
     label: "Chilean Peso → Euro",
     description: "Estimate the best day to convert CLP into EUR.",
-    baseRate: 1055,
-    volatility: 8,
   },
 ];
 
-function formatShortDate(timestamp: number) {
-  return new Date(timestamp).toLocaleDateString(undefined, {
+function formatShortDate(date: string) {
+  return new Date(date).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
 }
 
-function formatLongDate(timestamp: number) {
-  return new Date(timestamp).toLocaleDateString(undefined, {
-    weekday: "long",
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString(undefined, {
     month: "long",
     day: "numeric",
     year: "numeric",
   });
-}
-
-function buildFakeForecast(currency: Currency): ForecastPoint[] {
-  const config = CURRENCIES.find((c) => c.code === currency)!;
-  const today = new Date();
-  const points: ForecastPoint[] = [];
-
-  let current = config.baseRate;
-
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-
-    const wave1 = Math.sin(i / 4) * config.volatility * 1.4;
-    const wave2 = Math.cos(i / 7) * config.volatility * 0.8;
-    const trend =
-      currency === "USD"
-        ? -i * config.volatility * 0.015
-        : currency === "BRL"
-        ? i * config.volatility * 0.02
-        : Math.sin(i / 9) * config.volatility * 0.5;
-
-    current = config.baseRate + wave1 + wave2 + trend;
-
-    points.push({
-      date: date.toISOString(),
-      timestamp: date.getTime(),
-      rate: Number(current.toFixed(currency === "CLP" ? 2 : 4)),
-    });
-  }
-
-  return points;
-}
-
-function getBestDay(points: ForecastPoint[]) {
-  return points.reduce((best, current) =>
-    current.rate < best.rate ? current : best
-  );
 }
 
 function CustomTooltip({
@@ -111,13 +68,13 @@ function CustomTooltip({
 }: {
   active?: boolean;
   payload?: Array<{ value?: number }>;
-  label?: number;
+  label?: string;
 }) {
   if (!active || !payload?.length || !label) return null;
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-      <div className="text-xs text-slate-500">{formatLongDate(label)}</div>
+      <div className="text-xs text-slate-500">{formatDate(label)}</div>
       <div className="text-sm font-semibold text-slate-900">
         {typeof payload[0]?.value === "number"
           ? payload[0].value.toFixed(4)
@@ -129,11 +86,54 @@ function CustomTooltip({
 
 export default function PlannerPage() {
   const [currency, setCurrency] = useState<Currency>("USD");
-  const [hasCalculated, setHasCalculated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<PlannerResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const forecast = useMemo(() => buildFakeForecast(currency), [currency]);
-  const bestDay = useMemo(() => getBestDay(forecast), [forecast]);
   const selectedConfig = CURRENCIES.find((c) => c.code === currency)!;
+
+  async function handleCalculate() {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const res = await fetch("/api/planner/best-day", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currency,
+          days_ahead: 30,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || data.error || "Something went wrong");
+        return;
+      }
+
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to calculate best date");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const chartData =
+    result?.forecast.map((point) => ({
+      ...point,
+      timestamp: new Date(point.date).getTime(),
+    })) ?? [];
+
+  const bestPoint = result
+    ? chartData.find((point) => point.date === result.best_date)
+    : null;
 
   return (
     <div className="py-12">
@@ -146,8 +146,8 @@ export default function PlannerPage() {
             Find the best predicted day to exchange into euros
           </h1>
           <p className="text-slate-600 text-lg max-w-3xl leading-relaxed">
-            Select a currency and calculate the most favorable predicted date,
-            within the next 30 days, to convert your money into EUR.
+            Select a currency and calculate the most favorable predicted date
+            within the next 30 days to convert your money into EUR.
           </p>
         </div>
 
@@ -164,15 +164,12 @@ export default function PlannerPage() {
               <select
                 id="currency"
                 value={currency}
-                onChange={(e) => {
-                  setCurrency(e.target.value as Currency);
-                  setHasCalculated(false);
-                }}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
                 className="w-full md:w-80 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-teal-500"
               >
                 {CURRENCIES.map((item) => (
                   <option key={item.code} value={item.code}>
-                    ({item.code}) {item.label}
+                    {item.code} — {item.label}
                   </option>
                 ))}
               </select>
@@ -183,39 +180,45 @@ export default function PlannerPage() {
             </div>
 
             <button
-              onClick={() => setHasCalculated(true)}
-              className="px-5 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition"
+              onClick={handleCalculate}
+              className="px-5 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition disabled:opacity-60"
               type="button"
+              disabled={loading}
             >
-              Calculate best date
+              {loading ? "Calculating..." : "Calculate best date"}
             </button>
           </div>
         </div>
 
-        {hasCalculated && (
+        {error && (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+            {error}
+          </div>
+        )}
+
+        {result && (
           <>
-            <div className="rounded-3xl border border-slate-200 bg-white shadow-sm p-6 md:p-8">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 shadow-sm p-6 md:p-8">
               <p className="text-sm uppercase tracking-[0.16em] text-slate-500 mb-3">
                 Best predicted date
               </p>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-teal-500"></div>
-
-                  <div className="text-4xl md:text-5xl font-bold text-slate-900">
-                    {formatLongDate(bestDay.timestamp)}
-                  </div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-3 h-3 rounded-full bg-teal-500" />
+                <div className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
+                  {formatDate(result.best_date)}
                 </div>
+              </div>
 
-                <div className="text-slate-600 text-lg">
-                  Estimated exchange rate:{" "}
-                  <span className="font-semibold text-slate-900">
-                    {currency === "CLP"
-                      ? bestDay.rate.toFixed(2)
-                      : bestDay.rate.toFixed(4)}
-                  </span>
-                </div>
+              <div className="text-slate-600 text-lg">
+                Predicted exchange rate:{" "}
+                <span className="font-semibold text-slate-900">
+                  {result.best_fx.toFixed(4)}
+                </span>
+              </div>
+
+              <div className="mt-2 text-sm text-slate-500">
+                Current day: {result.current_date}
               </div>
             </div>
 
@@ -225,16 +228,16 @@ export default function PlannerPage() {
             >
               <div className="mb-4">
                 <h2 className="text-xl font-semibold text-slate-900">
-                  30-Day Exchange Rate Forecast
+                  30-Day Forecast
                 </h2>
                 <p className="text-slate-500 text-sm">
-                  Predicted exchange rates for {currency} → EUR over the next month
+                  Predicted path for {result.currency} → EUR
                 </p>
               </div>
 
               <ResponsiveContainer width="100%" height="88%">
                 <AreaChart
-                  data={forecast}
+                  data={chartData}
                   margin={{ top: 20, right: 20, left: 0, bottom: 10 }}
                 >
                   <defs>
@@ -257,10 +260,8 @@ export default function PlannerPage() {
                   />
 
                   <XAxis
-                    dataKey="timestamp"
-                    type="number"
-                    domain={["dataMin", "dataMax"]}
-                    tickFormatter={(v: number) => formatShortDate(v)}
+                    dataKey="date"
+                    tickFormatter={(v: string) => formatShortDate(v)}
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#64748b", fontSize: 12 }}
@@ -274,27 +275,26 @@ export default function PlannerPage() {
                     tick={{ fill: "#64748b", fontSize: 12 }}
                     dx={-10}
                     tickFormatter={(v: number) =>
-                      Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(2)
+                      Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(4)
                     }
                   />
 
-                  <Tooltip
-                    labelFormatter={(label) => Number(label)}
-                    content={<CustomTooltip />}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
 
-                  <ReferenceDot
-                    x={bestDay.timestamp}
-                    y={bestDay.rate}
-                    r={6}
-                    fill="#0f172a"
-                    stroke="#14b8a6"
-                    strokeWidth={2}
-                  />
+                  {bestPoint && (
+                    <ReferenceDot
+                      x={bestPoint.date}
+                      y={bestPoint.fx}
+                      r={6}
+                      fill="#0f172a"
+                      stroke="#14b8a6"
+                      strokeWidth={2}
+                    />
+                  )}
 
                   <Area
                     type="monotone"
-                    dataKey="rate"
+                    dataKey="fx"
                     stroke="#14b8a6"
                     strokeWidth={2.5}
                     fill="url(#plannerGradient)"
