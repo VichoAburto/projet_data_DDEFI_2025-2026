@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import PageHeader from "@/components/PageHeader";
 
 type Point = { t: number; rate: number }; // t = unix ms timestamp
 
@@ -173,10 +174,15 @@ export default function PairPage() {
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6">
+        <PageHeader
+          eyebrow="FX Analysis"
+          title="Foreign Exchange Pairs"
+          description="Explore historical exchange-rate movements and short-term trends across major currency pairs."
+        />
         {/* Top bar: pair menu */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
               {pairMeta.title}
             </h1>
             <span className="text-slate-600 text-lg">
@@ -203,19 +209,25 @@ export default function PairPage() {
         </div>
 
         {/* Price row */}
-        <div className="flex items-baseline gap-4">
-          <span className="text-4xl md:text-5xl font-bold text-slate-900">
-            {Number.isFinite(currentRate) ? currentRate.toFixed(4) : "--"}
-          </span>
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 w-fit">
+          <div className="text-sm text-slate-500 mb-2">
+            Current exchange rate
+          </div>
 
-          <span
-            className={`text-lg font-medium ${
-              isPositive ? "text-emerald-600" : "text-rose-600"
-            }`}
-          >
-            {isPositive ? "+" : ""}
-            {changePct.toFixed(2)}%
-          </span>
+          <div className="flex items-baseline gap-4">
+            <span className="text-4xl md:text-5xl font-bold text-slate-900">
+              {Number.isFinite(currentRate) ? currentRate.toFixed(4) : "--"}
+            </span>
+
+            <span
+              className={`text-lg font-semibold ${
+                isPositive ? "text-emerald-600" : "text-rose-600"
+              }`}
+            >
+              {isPositive ? "+" : ""}
+              {changePct.toFixed(2)}%
+            </span>
+          </div>
         </div>
 
         {/* Range buttons */}

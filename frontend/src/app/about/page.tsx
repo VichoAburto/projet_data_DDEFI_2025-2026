@@ -1,9 +1,13 @@
 import Image from "next/image";
+import PageHeader from "@/components/PageHeader";
 
 export default function AboutPage() {
   return (
     <div className="max-w-6xl mx-auto py-12">
-      <h1 className="text-4xl font-bold text-slate-900 mb-6">About Us</h1>
+      <PageHeader
+        title="About Us"
+        description="Learn more about the project, its purpose, and how historical exchange-rate data and machine learning are used to support FX decisions."
+      />
       <div className="grid md:grid-cols-[1.4fr_1fr] gap-10 items-start">
         <div>
 
