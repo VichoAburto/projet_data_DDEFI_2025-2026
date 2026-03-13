@@ -11,6 +11,7 @@ import {
   Tooltip,
   ReferenceDot,
 } from "recharts";
+import PageHeader from "@/components/PageHeader";
 
 type Currency = "USD" | "BRL" | "CLP";
 
@@ -139,16 +140,11 @@ export default function PlannerPage() {
     <div className="py-12">
       <div className="max-w-5xl mx-auto flex flex-col gap-8">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-teal-700 mb-3">
-            Exchange Planner
-          </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4">
-            Find the best predicted day to exchange into euros
-          </h1>
-          <p className="text-slate-600 text-lg max-w-3xl leading-relaxed">
-            Select a currency and calculate the most favorable predicted date
-            within the next 30 days to convert your money into EUR.
-          </p>
+          <PageHeader
+            eyebrow="Exchange Planner"
+            title="Find the best predicted day to exchange into euros"
+            description="Select a currency and calculate the most favorable predicted date within the next 30 days to convert your money into EUR."
+          />
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white shadow-sm p-6 md:p-8">

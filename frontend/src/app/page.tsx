@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { US, BR, CL, EU } from "country-flag-icons/react/3x2";
+import PageHeader from "@/components/PageHeader";
 
 const pairs = [
   {
@@ -27,42 +28,35 @@ export default function HomePage() {
     <div className="py-12 md:py-20">
       <section className="mb-16">
         <div className="max-w-4xl">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-teal-700 mb-4">
-            FX Decision Support
-          </p>
+          <PageHeader
+            eyebrow="FX Decision Support"
+            title="Find the best predicted day to exchange your money into euros."
+            description="This app helps users decide when it may be most favorable, within the next month, to convert CLP, BRL, or USD into EUR using historical exchange-rate data and machine learning forecasts."
+            actions={
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/planner"
+                  className="px-5 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition"
+                >
+                  Open Planner
+                </Link>
 
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6">
-            Find the best predicted day to exchange your money into euros.
-          </h1>
+                <Link
+                  href="/pair/EURUSD"
+                  className="px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-medium hover:border-slate-400 hover:text-slate-900 transition"
+                >
+                  Explore FX Pairs
+                </Link>
 
-          <p className="text-lg text-slate-600 leading-relaxed max-w-3xl mb-8">
-            This app helps users decide when it may be most favorable, within
-            the next month, to convert CLP, BRL, or USD into EUR using
-            historical exchange-rate data and machine learning forecasts.
-          </p>
-
-          <div className="flex flex-wrap gap-4">
-            <Link
-              href="/planner"
-              className="px-5 py-3 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 transition"
-            >
-              Open Planner
-            </Link>
-
-            <Link
-              href="/pair/EURUSD"
-              className="px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-medium hover:border-slate-400 hover:text-slate-900 transition"
-            >
-              Explore FX Pairs
-            </Link>
-
-            <Link
-              href="/about"
-              className="px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-medium hover:border-slate-400 hover:text-slate-900 transition"
-            >
-              About the Project
-            </Link>
-          </div>
+                <Link
+                  href="/about"
+                  className="px-5 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-medium hover:border-slate-400 hover:text-slate-900 transition"
+                >
+                  About the Project
+                </Link>
+              </div>
+            }
+          />
         </div>
       </section>
 
